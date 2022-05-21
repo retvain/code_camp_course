@@ -12,9 +12,9 @@
     "CodeCampApi": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "launchUrl": "swagger",
-      "applicationUrl": "https://localhost:7089;http://localhost:5089",
+      "REMOVElaunchBrowser": true,
+      "REMOVElaunchUrl": "swagger",
+      "applicationUrl": "http://localhost:7089;http://localhost:5089",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
