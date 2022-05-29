@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using CodeCampApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace CodeCampApi.Controllers
@@ -10,35 +11,28 @@ namespace CodeCampApi.Controllers
     [Route("[controller]")]
     public class RateReportController : ControllerBase
     {
-        private static List<RateReport> rateReports = new List<RateReport>
-        {
-            new RateReport
-            {
-                Id = 1,
-                Name = "Dollar",
-                FirstName = "John",
-                LastName = "Parker",
-                Place = "USA"
-            }
-        };
-
         private readonly ILogger<RateReportController> _logger;
+        private readonly DataContext _context;
 
-        public RateReportController(ILogger<RateReportController> logger)
+        public RateReportController(
+            ILogger<RateReportController> logger,
+            DataContext context
+            )
         {
             _logger = logger;
+            _context = context;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetReports()
         {
-            return Ok(rateReports);
+            return Ok(await _context.RateReports.ToListAsync());
         }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetReport(int id)
         {
-            var report = rateReports.Find(key => key.Id == id);
+            var report = await _context.RateReports.FindAsync(id);
 
             if (report == null)
             {
@@ -51,15 +45,16 @@ namespace CodeCampApi.Controllers
         [HttpPost]
         public async Task<IActionResult> AddReport(RateReport rateReport)
         {
-            rateReports.Add(rateReport);
-            return Ok(rateReports);
+            _context.RateReports.Add(rateReport);
+            await _context.SaveChangesAsync();
+            return Ok(await _context.RateReports.ToListAsync());
         }
 
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateReport(RateReport request, int id)
         {
             request.Id = id;
-            var report = rateReports.Find(key => key.Id == request.Id);
+            var report = await _context.RateReports.FindAsync(id);
 
             if (report == null)
                 return NotFound("report no found");
@@ -69,21 +64,25 @@ namespace CodeCampApi.Controllers
             report.LastName = request.LastName;
             report.Place = request.Place;
 
+            await _context.SaveChangesAsync();
             
-            return Ok(report);
+            return Ok(await _context.RateReports.ToListAsync());
         }
         
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteReport(int id)
         {
-            var report = rateReports.Find(key => key.Id == id);
+            var report = await _context.RateReports.FindAsync(id);
 
             if (report == null)
-                return NotFound("report no found");
+            {
+                return BadRequest("report not found.");
+            }
 
-            rateReports.Remove(report);
+            _context.RateReports.Remove(report);
+            await _context.SaveChangesAsync();
 
-            return Ok(report);
+            return Ok(await _context.RateReports.ToListAsync());
         }
     }
 }
